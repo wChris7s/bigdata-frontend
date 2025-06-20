@@ -1,0 +1,48 @@
+<div class="flex flex-row items-start justify-center max-h-screen max-w-screen gap-5 p-5">
+
+  <div class="flex flex-col items-center justify-center p-5 shadow-xl rounded-xl border-1 border-gray-200">
+    @if (currentImage) {
+
+      <div class="w-full max-w-3xl">
+
+        <div [hidden]="!isLoading" class="flex items-center justify-center h-64">
+          <p-progress-spinner ariaLabel="loading"/>
+        </div>
+        <img [hidden]="isLoading" [src]="currentImage.urls.full" [alt]="currentImage.alt_description"
+             (load)="onLoadDisableLoading()"
+             class="rounded-2xl shadow-lg max-h-[70vh] object-contain w-full bg-white"/>
+
+        <div class="mt-4 text-center">
+          <p class="text-xl font-semibold">{{ currentImage.alt_description || 'Sin descripción' }}</p>
+          <div class="text-sm text-gray-500">
+            <p>Likes: {{ currentImage.likes }} | Downloads: {{ currentImage.downloads }}</p>
+            <div class="mt-2">
+              <span class="font-semibold">Tags:</span>
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 mt-1">
+                @for (tag of currentImage.tags; track tag) {
+                  <p-tag class="custom-tag" [value]="tag.title" severity="success"/>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    } @else {
+      <p class="text-lg text-gray-600">No hay más imágenes por mostrar.</p>
+    }
+  </div>
+
+  <div class="flex flex-col items-center justify-center p-5 gap-5 shadow-xl rounded-xl border-1 border-gray-200">
+    <p-button severity="success" [outlined]="true" (click)="rateImage(true)">
+      <ng-template #icon>
+        <span class="material-symbols-outlined">thumb_up</span>
+      </ng-template>
+    </p-button>
+    <p-button severity="danger" [outlined]="true" (click)="rateImage(false)">
+      <ng-template #icon>
+        <span class="material-symbols-outlined">thumb_down</span>
+      </ng-template>
+    </p-button>
+  </div>
+</div>
+
