@@ -96,6 +96,13 @@ para verifivar si se estan creando en la carpeta los archivos json colocar:
 hdfs dfs -ls /user/jav1/TrabajoFinalhdfsJSON
 ```
 para verifivar si se estan creando los resultados generales usar:
+
 ```bash
 hdfs dfs -ls /user/jav1/resultadosFinal
+```
+para dar permisos de hadoop:
+```bash
+chmod +x mapper.py reducer.py
+chmod +x ejecutar_periodicamente.sh
+
 ```
