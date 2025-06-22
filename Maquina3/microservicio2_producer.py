@@ -1,51 +1,41 @@
-  import os
+import os
 import json
-import random
-import uuid
+import time
+from kafka import KafkaProducer
 
-# Carpeta donde se guardarán los archivos
-carpeta = "data"
-os.makedirs(carpeta, exist_ok=True)
+# Configuración
+KAFKA_BROKER = '192.168.1.101:9092'  # IP de tu broker Kafka
+TOPIC = 'interacciones-imagenes'
+CARPETA_DATA = 'data'  # Carpeta donde estarán los archivos .json
 
-# Datos base
-descripciones = [
-    "A lush greenhouse filled with greenery.",
-    "Sunset over a peaceful mountain lake.",
-    "Abstract painting with vibrant colors.",
-    "City skyline on a foggy morning.",
-    "Close-up of dew on a spider web."
-]
+# Inicializar productor
+producer = KafkaProducer(
+    bootstrap_servers=[KAFKA_BROKER],
+    value_serializer=lambda v: json.dumps(v).encode('utf-8')
+)
 
-tags_base = [
-    "land", "plant", "garden", "leaf", "spain", "gardening", "path", "rainforest",
-    "outdoors", "pottery", "herbs", "greenhouse", "vase", "backyard", "vegetation",
-    "potted plant", "jar", "valencia", "yard", "herbal"
-]
+print(f"[✓] Microservicio iniciado. Monitoreando la carpeta '{CARPETA_DATA}' cada 2 segundos...")
 
-# Generador principal
+# Bucle de revisión continua
 while True:
-    nombre = input("Ingrese un nombre para el archivo (o 0 para salir): ")
+    try:
+        archivos = [f for f in os.listdir(CARPETA_DATA) if f.endswith('.json')]
 
-    if nombre == "0":
-        print("Programa finalizado.")
-        break
+        for archivo in archivos:
+            ruta_archivo = os.path.join(CARPETA_DATA, archivo)
+            with open(ruta_archivo, 'r', encoding='utf-8') as f:
+                datos = json.load(f)
 
-    # Crear datos aleatorios
-    data = {
-        "username": f"{random.choice(['bright', 'dark', 'swift', 'mighty', 'lazy'])}-"
-                    f"{random.choice(['tiger', 'eagle', 'lion', 'fox'])}-"
-                    f"{random.randint(100, 999)}",
-        "like": random.choice([True, False]),
-        "imageDescription": random.choice(descripciones),
-        "historicLikes": random.randint(0, 500),
-        "historicDownloads": random.randint(100, 10000),
-        "tags": random.sample(tags_base, k=random.randint(5, len(tags_base)))
-    }
+            # Enviar a Kafka
+            producer.send(TOPIC, datos)
+            print(f"[→] JSON enviado a Kafka: {archivo}")
 
-    # Guardar en archivo JSON
-    ruta = os.path.join(carpeta, f"{nombre}.json")
-    with open(ruta, 'w') as f:
-        json.dump(data, f, indent=4)
+            # Eliminar archivo después de enviarlo
+            os.remove(ruta_archivo)
+            print(f"[✓] Archivo eliminado: {archivo}")
 
-    print(f"Archivo '{ruta}' generado con éxito.\n")
+    except Exception as e:
+        print(f"[✗] Error procesando archivos: {e}")
+
+    time.sleep(2)
 
