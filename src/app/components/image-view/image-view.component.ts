@@ -5,6 +5,7 @@ import {Button} from 'primeng/button';
 import {Tag} from 'primeng/tag';
 import {EventMetadata} from '../../domain/event-metadata';
 import {ProgressSpinner} from 'primeng/progressspinner';
+import {EventProcesserService} from '../../services/event-processer.service';
 
 @Component({
   selector: 'app-image-view',
@@ -20,12 +21,13 @@ export class ImageViewComponent implements OnInit {
   protected currentImage: ImgMetadata | null;
   protected isLoading: boolean;
   private readonly unplashService: UnplashService;
-
+  private readonly eventProcesserService: EventProcesserService;
 
   constructor() {
     this.currentImage = null;
     this.isLoading = false;
     this.unplashService = inject(UnplashService);
+    this.eventProcesserService = inject(EventProcesserService);
   }
 
   ngOnInit(): void {
@@ -37,7 +39,6 @@ export class ImageViewComponent implements OnInit {
   }
 
   rateImage(liked: boolean): void {
-    console.log(liked ? 'Like' : 'Dislike', this.currentImage);
     const eventMetadata = {
       username: sessionStorage.getItem('randomUser'),
       like: liked,
@@ -46,7 +47,7 @@ export class ImageViewComponent implements OnInit {
       historicDownloads: this.currentImage?.downloads || 0,
       tags: this.currentImage?.tags.map(tag => tag.title) || []
     } as EventMetadata;
-    console.log({eventMetadata});
+    this.eventProcesserService.sendEvent(eventMetadata).subscribe();
     this.loadNextImage();
   }
 
