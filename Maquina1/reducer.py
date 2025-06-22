@@ -2,25 +2,31 @@
 import sys
 import json
 
-total_likes = 0
-total_downloads = 0
-total_historic = 0
+current_key = None
+total = 0
+results = {}
 
 for line in sys.stdin:
     try:
-        _, likes, downloads, historic = line.strip().split("\t")
-        total_likes += int(likes)
-        total_downloads += int(downloads)
-        total_historic += int(historic)
+        key, value = line.strip().split('\t')
+        value = int(value)
+
+        if key != current_key and current_key is not None:
+            results[current_key] = total
+            total = value
+        else:
+            total += value
+
+        current_key = key
     except:
         continue
 
-resultado = {
-    "totalLikes": total_likes,
-    "totalDownloads": total_downloads,
-    "totalHistoricDownloads": total_historic
-}
+if current_key is not None:
+    results[current_key] = total
 
-# Escribe como JSON una sola línea
-print(json.dumps(resultado))
+print(json.dumps({
+    "totalLikes": results.get("likes", 0),
+    "totalDownloads": results.get("downloads", 0),
+    "totalHistoricDownloads": results.get("historicDownloads", 0)
+}))
 

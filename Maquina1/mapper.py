@@ -5,10 +5,13 @@ import json
 for line in sys.stdin:
     try:
         data = json.loads(line)
-        likes = data.get("likes", 0)
+        likes = 1 if data.get("like") else 0
         downloads = data.get("downloads", 0)
-        historic = data.get("historicLikes", 0)
-        print(f"total\t{likes}\t{downloads}\t{historic}")
-    except Exception:
-        continue
+        historic = data.get("historicDownloads", 0)
+
+        print(f"likes\t{likes}")
+        print(f"downloads\t{downloads}")
+        print(f"historicDownloads\t{historic}")
+    except Exception as e:
+        pass  # Silenciar errores por si no es una línea JSON válida
 
