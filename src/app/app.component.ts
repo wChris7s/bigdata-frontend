@@ -15,6 +15,7 @@ export class AppComponent implements OnInit {
       sessionStorage.setItem('randomUser', newUser);
     }
     const currentUser = sessionStorage.getItem('randomUser');
+    console.log({"user": currentUser});
   }
 
   generateRandomUsername(): string {
