@@ -66,3 +66,36 @@ bin/zookeeper-shell.sh localhost:2181
 ls /brokers/ids
 
 ```
+
+4.-Activar microservicios
+
+antes de activar los microservicios:
+Desactivar savemode del cluster:
+```bash
+hdfs dfsadmin -safemode leave
+```
+Crear esta carpeta (solo una ves si no lo isieron)
+```bash
+hdfs dfs -mkdir -p /user/jav1/resultadosFinal
+```
+
+en maquina 3
+```bash
+# maquina3
+python3 generador_json.py
+python3 microservicio2_producer.py
+```
+en maquina 1
+```bash
+# maquina1
+python3 consumer.py
+python3 microservicioJSON.py
+```
+para verifivar si se estan creando en la carpeta los archivos json colocar:
+```bash
+hdfs dfs -ls /user/jav1/TrabajoFinalhdfsJSON
+```
+para verifivar si se estan creando los resultados generales usar:
+```bash
+hdfs dfs -ls /user/jav1/resultadosFinal
+```
