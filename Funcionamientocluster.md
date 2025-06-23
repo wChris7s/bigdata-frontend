@@ -26,6 +26,9 @@ sudo apt install -y nodejs
 sudo npm install -g @angular/cli
 pip3 install confluent-kafka==1.5.0
 
+# para las paginas
+pip install fastapi uvicorn
+
 ```
 Una vez instalado, ejecuta el frontend con:
 

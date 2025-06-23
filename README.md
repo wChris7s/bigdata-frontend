@@ -14,8 +14,13 @@ ejecutar_periodicamente.sh
 ConsumidornUBE.py
 
 ```bash
+# maquina1
 ./ejecutar_periodicamente.sh
 python3 ConsumerNube.py
+# maquina2
+uvicorn app:app --host 0.0.0.0 --port 8080
+# maquina3
+docker compose --profile=flink up
 ```
 
 verificar en el front los json creados y los resultados usando estos comandos
