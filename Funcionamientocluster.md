@@ -24,12 +24,15 @@ sudo apt install -y nodejs
 
 # Instala Angular CLI globalmente
 sudo npm install -g @angular/cli
+pip3 install confluent-kafka==1.5.0
+
 ```
 Una vez instalado, ejecuta el frontend con:
 
 ```bash
 jps  # Debe mostrar: NameNode
 cd bigdata-frontend
+npm install
 ng serve
 ```
 

@@ -1,22 +1,20 @@
 from confluent_kafka import Consumer
 import json
 import os
-import uuid
 import subprocess
 
-# Configuración de Azure Kafka
+# Configuración
 TOPIC = ''
 CARPETA_HDFS = '/user/jav1/TrabajoFinalhdfsJSON'
-CARPETA_TEMP = '/tmp/kafka_json_azure'
+ARCHIVO_NDJSON_LOCAL = '/tmp/kafka_json_azure/acumulador.json'
 
-# Connection string
 AZURE_BOOTSTRAP_SERVER = ''
 AZURE_USERNAME = ''
 AZURE_PASSWORD = ''
 
-os.makedirs(CARPETA_TEMP, exist_ok=True)
+os.makedirs('/tmp/kafka_json_azure', exist_ok=True)
 
-# Configuración del consumidor
+# Configurar consumidor Kafka
 consumer = Consumer({
     'bootstrap.servers': AZURE_BOOTSTRAP_SERVER,
     'security.protocol': 'SASL_SSL',
@@ -41,25 +39,27 @@ try:
 
         try:
             data = json.loads(msg.value().decode('utf-8'))
-            nombre_archivo = f"{uuid.uuid4()}.json"
-            ruta_local = os.path.join(CARPETA_TEMP, nombre_archivo)
 
-            with open(ruta_local, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
+            # Agregar el JSON como línea a acumulador.json (NDJSON)
+            with open(ARCHIVO_NDJSON_LOCAL, 'a', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False)
+                f.write('\n')
+
+            # Nombre único por timestamp para evitar sobrescritura en HDFS
+            nombre_archivo_hdfs = f"ndjson_{os.getpid()}_{int(os.path.getmtime(ARCHIVO_NDJSON_LOCAL))}.json"
 
             resultado = subprocess.run(
-                ['hdfs', 'dfs', '-put', ruta_local, f"{CARPETA_HDFS}/{nombre_archivo}"],
+                ['hdfs', 'dfs', '-put', '-f', ARCHIVO_NDJSON_LOCAL, f"{CARPETA_HDFS}/{nombre_archivo_hdfs}"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True
             )
 
             if resultado.returncode == 0:
-                print(f"[↑] Subido a HDFS: TrabajoFinalhdfsJSON/{nombre_archivo}")
+                print(f"[↑] Subido NDJSON a HDFS: {CARPETA_HDFS}/{nombre_archivo_hdfs}")
+                os.remove(ARCHIVO_NDJSON_LOCAL)  # Limpiar archivo local tras subida
             else:
-                print(f"[✗] Error al subir {nombre_archivo}:\n{resultado.stderr}")
-
-            os.remove(ruta_local)
+                print(f"[✗] Error al subir archivo:\n{resultado.stderr}")
 
         except Exception as e:
             print(f"[✗] Error procesando mensaje:\n{e}")
