@@ -3,6 +3,7 @@ import {Button} from 'primeng/button';
 import {Toast} from 'primeng/toast';
 import {StompService} from '../../services/stomp.service';
 import {MessageService} from 'primeng/api';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
@@ -18,10 +19,12 @@ export class NavbarComponent implements OnInit {
   username: string = '';
   stompService: StompService;
   messageService: MessageService;
+  router: Router;
 
   constructor() {
     this.stompService = inject(StompService);
     this.messageService = inject(MessageService);
+    this.router = inject(Router);
   }
 
   ngOnInit(): void {
@@ -35,5 +38,13 @@ export class NavbarComponent implements OnInit {
         })
       }
     });
+  }
+
+  redirectToImageView() {
+    void this.router.navigateByUrl("/home/view");
+  }
+
+  redirectToHdfsResults() {
+    void this.router.navigateByUrl("/home/hdfs");
   }
 }
