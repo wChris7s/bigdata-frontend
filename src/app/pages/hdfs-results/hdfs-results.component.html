@@ -1,3 +1,5 @@
-<div class="flex flex-col justify-center p-10 w-5/6 h-full">
+<div class="flex flex-col justify-center p-10 w-5/6 space-y-10 h-full">
   <p-chart type="bar" [data]="chartData" [options]="chartOptions"></p-chart>
+  <p-chip [label]="'Total de likes: ' + this.data.totalLikes"></p-chip>
+  <p-chip [label]="'Total de descargas: ' + this.data.totalHistoricDownloads"></p-chip>
 </div>
